@@ -4,6 +4,8 @@ import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 const Toast = ({ message, type = 'info', duration = 5000, onClose }) => {
   const [isVisible, setIsVisible] = useState(true);
 
+  // Auto-dismiss disabled as per user request
+  // Auto-dismiss enabled for better user experience
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);

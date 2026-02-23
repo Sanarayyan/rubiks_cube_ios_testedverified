@@ -379,6 +379,7 @@ const Cube3D = ({ cubeState, onStickerClick, animateMove, onMoveDone, durationMs
   const handleCommit = useCallback(() => {
     if (animateMove) {
       const next = applyMoveFacelets(internalFacelets, animateMove);
+      setInternalFacelets(next); // Update internal state!
       onMoveDone && onMoveDone(next);
     }
   }, [animateMove, internalFacelets, onMoveDone]);
@@ -387,27 +388,24 @@ const Cube3D = ({ cubeState, onStickerClick, animateMove, onMoveDone, durationMs
     <div className="w-full h-full min-h-[350px] flex items-center justify-center">
       <Suspense fallback={<LoadingSpinner size="md" text=" " />}>
         <Canvas
-          camera={{ position: [7.5, 7.5, 7.5], fov: 34 }}
+          camera={{ position: [6, 6, 6], fov: 40 }} // Adjusted camera to fit cube better
           gl={{
             powerPreference: 'high-performance',
             antialias: true,
             alpha: true,
-            stencil: false,
-            depth: true,
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.2
+            preserveDrawingBuffer: true, // Helps with some flickering
           }}
-          dpr={[1, 2]}
+          dpr={[1, 2]} // Quality scaling
           style={{ background: 'transparent' }}
         >
           {/* Enhanced Lighting for Highlights/Reflections */}
-          <ambientLight intensity={1.8} />
-          <pointLight position={[10, 10, 10]} intensity={2.5} color="#ffffff" />
+          <ambientLight intensity={1.5} />
+          <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
           <pointLight position={[-10, 10, 10]} intensity={1.5} color="#4f46e5" />
-          <pointLight position={[10, -10, -10]} intensity={1.0} color="#3b82f6" />
+          <pointLight position={[10, -10, -10]} intensity={1.5} color="#3b82f6" />
           <spotLight
             position={[0, 15, 0]}
-            intensity={1.2}
+            intensity={1.0}
             penumbra={1}
             angle={Math.PI / 4}
             color="#ffffff"

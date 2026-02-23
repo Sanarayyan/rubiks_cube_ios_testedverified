@@ -4,7 +4,7 @@
 echo "🚀 Starting Rubik's Cube Solver servers..."
 
 # Set Node.js path
-export PATH="/usr/local/Cellar/node@18/18.20.8/bin:$PATH"
+# export PATH="/usr/local/Cellar/node@18/18.20.8/bin:$PATH"
 
 # Start backend (Flutter/Dart) on port 8081
 echo "📡 Starting Flutter backend on port 8081..."

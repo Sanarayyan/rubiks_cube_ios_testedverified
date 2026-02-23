@@ -8,7 +8,6 @@ const Navbar = () => {
 
   const navItems = [
     { path: '/manual', label: 'Manual Input', icon: Palette },
-    { path: '/history', label: 'History', icon: History },
   ];
 
   const isActive = (path) => location.pathname === path;

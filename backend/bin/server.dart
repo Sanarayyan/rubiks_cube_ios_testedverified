@@ -134,8 +134,8 @@ Future<Response> _solveCubeHandler(Request request) async {
       solution = enriched;
     }
 
-    // Save to history asynchronously
-    _saveToHistory(colors, solution, mode);
+    // Save to history asynchronously (Feature frozen)
+    // _saveToHistory(colors, solution, mode);
 
     return Response.ok(
       jsonEncode({'success': true, 'solution': solution}),

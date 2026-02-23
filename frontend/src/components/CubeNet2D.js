@@ -45,7 +45,7 @@ const FaceContainer = ({ faceIndex, cubeState, onCellClick, lockCenters, onCente
     <div className="flex flex-col items-center gap-1 flex-shrink-0">
       {/* Small Dynamic Badge */}
       <div className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl">
-        <span className={`text-[7px] font-black tracking-[0.1em] uppercase ${badgeColor || 'text-slate-400'}`}>{label}</span>
+        <span className={`text-[9px] font-black tracking-[0.1em] uppercase ${badgeColor || 'text-slate-400'}`}>{label}</span>
       </div>
 
       {/* Face Tray */}

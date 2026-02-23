@@ -32,7 +32,8 @@ const NotFound = () => {
     return {
       ...cfg,
       status: isError ? `Incorrect (${current}/9)` : `Perfect (9/9)`,
-      isError
+      isError,
+      isPerfect: !isError
     };
   });
 
@@ -60,23 +61,26 @@ const NotFound = () => {
           <h1 className="text-3xl font-black text-white mb-2">
             {isValid ? "Cube Is Ready!" : "Check Your Cube"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">
-            {isValid ? "Everything looks perfect for solving" : "Please adjust the stickers to match 9 of each color"}
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-10 leading-relaxed">
+            {isValid ? "Everything looks perfect for solving" : "You’ve added too many of one color. Each color should appear exactly 9 times."}
           </p>
 
-          <h2 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Colour Counts</h2>
+          <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6">Colour Counts</h2>
 
           {/* Color Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-10">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-10">
             {colorCounts.map((item, idx) => (
-              <div key={idx} className={`p-4 rounded-2xl border flex items-center gap-4 transition-transform active:scale-95 ${item.isError ? 'bg-red-500/5 border-red-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+              <div key={idx} className={`p-3 sm:p-4 rounded-2xl border flex items-center gap-2 sm:gap-4 transition-transform active:scale-95 
+                ${item.isError ? 'bg-red-500/5 border-red-500/20' : 'bg-white/5 border-white/10'}`}>
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+                  className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg relative overflow-hidden"
                   style={{ backgroundColor: item.color }}
-                />
-                <div className="min-w-0">
-                  <h3 className="text-sm font-black text-white truncate">{item.name}</h3>
-                  <p className={`text-[10px] font-bold whitespace-nowrap ${item.isError ? 'text-red-400' : 'text-emerald-400'}`}>
+                >
+                  {item.isPerfect && <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[10px] sm:text-xs font-black text-white leading-tight mb-0.5">{item.name}</h3>
+                  <p className={`text-[9px] sm:text-[10px] font-bold ${item.isError ? 'text-red-400' : 'text-blue-400'} leading-tight`}>
                     {item.status}
                   </p>
                 </div>
@@ -84,7 +88,8 @@ const NotFound = () => {
             ))}
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons - Temporarily disabled */}
+          {/* 
           <div className="flex gap-4">
             <button
               onClick={() => navigate('/howtofix')}
@@ -101,17 +106,28 @@ const NotFound = () => {
               <span className="text-[10px] font-black uppercase tracking-wider">Help Center</span>
             </button>
           </div>
+          */}
+
+          {/* Return to Setup Action */}
+          <button
+            onClick={() => navigate('/manual', { state: { cubeState } })}
+            className="w-full h-16 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white flex items-center justify-center gap-3 shadow-xl shadow-blue-500/20 active:scale-95 transition-all mt-4"
+          >
+            <AlertCircle size={24} />
+            <span className="text-sm font-black uppercase tracking-[0.2em]">Return to Setup</span>
+          </button>
         </div>
 
         {/* Problems List Card */}
-        <div className={`backdrop-blur-2xl rounded-[2.5rem] p-8 border shadow-xl ${isValid ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-[#1F1235]/40 border-white/5'}`}>
+        <div className={`backdrop-blur-2xl rounded-[2.5rem] p-8 border shadow-xl ${isValid ? 'bg-blue-500/5 border-white/10' : 'bg-[#1F1235]/40 border-white/5'}`}>
           <div className="space-y-6">
             {isValid ? (
               <div className="flex items-center gap-5">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 size={22} className="text-emerald-400" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent" />
+                  <CheckCircle2 size={24} className="text-white relative z-10" />
                 </div>
-                <p className="text-[11px] font-bold text-emerald-300 leading-relaxed">
+                <p className="text-xs font-bold text-slate-300 leading-relaxed">
                   Your cube configuration is valid! You can now proceed to see the magic solution.
                 </p>
               </div>
@@ -119,9 +135,9 @@ const NotFound = () => {
               problems.map((prob, idx) => (
                 <div key={idx} className="flex items-center gap-5 group">
                   <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
-                    <AlertCircle size={22} className="text-red-400/80" />
+                    <AlertCircle size={24} className="text-red-400/80" />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-300 leading-relaxed">{prob}</p>
+                  <p className="text-xs font-bold text-slate-300 leading-relaxed">{prob}</p>
                 </div>
               ))
             )}

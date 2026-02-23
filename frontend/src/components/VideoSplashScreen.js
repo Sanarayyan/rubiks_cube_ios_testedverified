@@ -57,6 +57,18 @@ const VideoSplashScreen = () => {
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40 pointer-events-none" />
 
+            {/* Skip Button */}
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setFadeOut(true);
+                    setTimeout(() => navigate('/manual'), 150);
+                }}
+                className="absolute top-12 right-6 z-50 px-5 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-white/60 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all active:scale-95 hover:border-white/20"
+            >
+                Skip
+            </button>
+
             {/* Faster Loading Bar */}
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-48 h-[2px] bg-white/5 overflow-hidden rounded-full">
                 <div className="h-full bg-blue-500 animate-loading-bar shadow-[0_0_10px_#3b82f6]" />

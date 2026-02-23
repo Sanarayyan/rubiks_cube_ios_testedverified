@@ -72,8 +72,8 @@ def validate_colors(colors: List[str]) -> None:
 
 
 def detect_center_mapping(colors: List[str]) -> Dict[str, str]:
-    """Map each color letter to a face label URFDLB using the six center stickers."""
-    # Centers at indices 4, 13, 22, 31, 40, 49
+    """Map each color letter to a face label URFDLB using the six center stickers.
+    Human-friendly version: identifies which face is which by the color you picked for the center. """
     centers = {
         'U': colors[FACE_CENTERS['U']],
         'R': colors[FACE_CENTERS['R']],
@@ -83,8 +83,12 @@ def detect_center_mapping(colors: List[str]) -> Dict[str, str]:
         'B': colors[FACE_CENTERS['B']],
     }
     # Ensure six distinct center colors
-    if len(set(centers.values())) != 6:
-        raise ValueError('Center colors must be six distinct colors (invalid cube centers).')
+    unique_centers = set(centers.values())
+    if len(unique_centers) != 6:
+        missing = 6 - len(unique_centers)
+        message = f"Each side of your cube must have a DIFFERENT center color. Currently, you have duplicate colors in the middle of your faces. Please check your center pieces (the middle squares) and make sure they all match your real cube's distinct sides."
+        raise ValueError(message)
+    
     # Build reverse map: color -> face letter
     color_to_face: Dict[str, str] = {}
     for face, color in centers.items():
@@ -97,16 +101,23 @@ def colors_to_kociemba_string(colors: List[str]) -> str:
     Convert list of 54 colors into Kociemba facelet string by mapping each color to URFDLB
     using the actual center colors provided by the user.
     """
-    validate_colors(colors)
+    try:
+        validate_colors(colors)
+    except ValueError as ve:
+        # Re-wrap for human friendliness
+        err_msg = str(ve)
+        if "6 distinct colors" in err_msg:
+            friendly_msg = "A standard Rubik's Cube uses exactly 6 colors (usually White, Yellow, Red, Orange, Blue, and Green). Your input doesn't have 6 colors. Please check that you haven't missed a side!"
+        elif "Invalid count" in err_msg:
+             friendly_msg = f"Each color should appear exactly 9 times on your cube. {err_msg}. Please double-check your color matching!"
+        else:
+             friendly_msg = err_msg
+        raise ValueError(friendly_msg)
+
     color_to_face = detect_center_mapping(colors)
     # Map each sticker color to the corresponding face letter
     facelets: List[str] = []
     for c in colors:
-        if c not in color_to_face:
-            raise ValueError(
-                f'Color {c} not present among center colors {sorted(list(color_to_face.keys()))}. ' \
-                'The cube must use exactly the same 6 colors as its centers.'
-            )
         facelets.append(color_to_face[c])
     return ''.join(facelets)
 

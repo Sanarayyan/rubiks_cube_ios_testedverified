@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Use environment variable for API URL in production, fallback to localhost for dev
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+// Use environment variable for API URL in production, fallback to local IP for mobile dev
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://192.168.108.190:8081';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -38,6 +38,7 @@ api.interceptors.response.use(
 
 // API service functions
 export const cubeAPI = {
+  baseURL: API_BASE_URL,
   // Solve cube from color data
   solveCube: async (colors, mode = 'fast') => {
     try {

@@ -9,7 +9,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import ManualInput from './pages/ManualInput';
 // import ImageUpload from './pages/ImageUpload';
 import Solution from './pages/Solution';
-import History from './pages/History';
+// import History from './pages/History';
 import NotFound from './pages/NotFound';
 import HowToFix from './pages/HowToFix';
 import HelpCenter from './pages/HelpCenter';
@@ -19,7 +19,7 @@ import VideoSplashScreen from './components/VideoSplashScreen';
 function App() {
   // Debug logging
   console.log('React App is loading...');
-  console.log('API URL:', process.env.REACT_APP_API_URL || 'http://localhost:8081');
+  console.log('API URL:', process.env.REACT_APP_API_URL || 'http://192.168.108.190:8081');
 
   return (
     <ErrorBoundary>
@@ -44,7 +44,7 @@ function AppContent() {
           <Route path="/manual" element={<ManualInput />} />
           {/* Upload route temporarily disabled */}
           <Route path="/solution/:id" element={<Solution />} />
-          <Route path="/history" element={<History />} />
+          {/* <Route path="/history" element={<History />} /> */}
           <Route path="/howtofix" element={<HowToFix />} />
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/user-guide" element={<UserGuide />} />

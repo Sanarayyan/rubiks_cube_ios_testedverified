@@ -37,9 +37,7 @@ const History = () => {
         }))
         : [];
       setHistory(mappedHistory);
-      if (mappedHistory.length > 0) {
-        setActiveItem(mappedHistory[0]);
-      }
+      // Originally set activeItem here, removed to prevent auto-play
     } catch (error) {
       console.error('Load history error:', error);
     } finally {
@@ -125,95 +123,102 @@ const History = () => {
       </div>
 
       <div className="relative z-10 flex flex-col items-center h-auto px-6 pt-12 pb-48">
-        <div className="w-full max-w-md bg-[#1F1235]/60 backdrop-blur-3xl rounded-[3rem] p-6 border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.4)] mb-8 mt-12">
-          <div className="relative aspect-square flex items-center justify-center mb-8">
-            <div className="absolute top-0 right-0 flex gap-2 z-20">
-              <button
-                onClick={() => { setCurrentMoveIndex(-1); setIsPlaying(false); }}
-                className="p-2.5 bg-blue-500/10 backdrop-blur-md rounded-xl text-blue-400 border border-blue-500/20 active:scale-95 transition-all"
-              >
-                <RotateCcw size={16} />
-              </button>
-              <button className="p-2.5 bg-blue-500/10 backdrop-blur-md rounded-xl text-blue-400 border border-blue-500/20 active:scale-95 transition-all">
-                <Volume2 size={16} />
-              </button>
-            </div>
-            <div className="w-full h-full scale-110">
-              <Cube3D
-                cubeState={activeItem?.initialState || generateSolvedCube()}
-                animateMove={currentAnimateMove}
-                onMoveDone={onMoveDone}
-                durationMs={500}
-              />
-            </div>
-          </div>
+        {/* Page Heading */}
+        <h1 className="text-3xl font-black text-white mb-8 uppercase tracking-tight">
+          History
+        </h1>
 
-          <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                Solution {activeItem?.id || '----------'}
-              </span>
-              <span className="text-[10px] font-bold text-blue-400">
-                Move {currentMoveIndex + 1} / {activeItem?.solutionMoves?.length || 0}
-              </span>
-            </div>
-
-            <div className="px-1">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Start</span>
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Stop</span>
+        {activeItem && (
+          <div className="w-full max-w-md bg-[#1F1235]/60 backdrop-blur-3xl rounded-[3rem] p-6 border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.4)] mb-8 mt-4">
+            <div className="relative aspect-square flex items-center justify-center mb-8">
+              <div className="absolute top-0 right-0 flex gap-2 z-20">
+                <button
+                  onClick={() => { setCurrentMoveIndex(-1); setIsPlaying(false); }}
+                  className="p-2.5 bg-blue-500/10 backdrop-blur-md rounded-xl text-blue-400 border border-blue-500/20 active:scale-95 transition-all"
+                >
+                  <RotateCcw size={16} />
+                </button>
+                <button className="p-2.5 bg-blue-500/10 backdrop-blur-md rounded-xl text-blue-400 border border-blue-500/20 active:scale-95 transition-all">
+                  <Volume2 size={16} />
+                </button>
               </div>
-              <div className="relative h-1.5 bg-slate-800 rounded-full">
-                <div
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-                <div
-                  className="absolute w-4 h-4 bg-white rounded-full border-[3px] border-[#1F1235] shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all duration-300 pointer-events-none top-1/2 -translate-y-1/2"
-                  style={{ left: `calc(${progress}% - 8px)` }}
+              <div className="w-full h-full">
+                <Cube3D
+                  cubeState={activeItem?.initialState || generateSolvedCube()}
+                  animateMove={currentAnimateMove}
+                  onMoveDone={onMoveDone}
+                  durationMs={500}
                 />
               </div>
             </div>
 
-            {/* Mode Operation (Corresponded Method Display) */}
-            <div className="bg-black/20 rounded-2xl p-4 border border-white/5">
-              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Mode Operation</h4>
-              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar">
-                {activeItem?.solutionMoves?.map((move, i) => (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  Solution {activeItem?.id || '----------'}
+                </span>
+                <span className="text-[10px] font-bold text-blue-400">
+                  Move {currentMoveIndex + 1} / {activeItem?.solutionMoves?.length || 0}
+                </span>
+              </div>
+
+              <div className="px-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Start</span>
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Stop</span>
+                </div>
+                <div className="relative h-1.5 bg-slate-800 rounded-full">
                   <div
-                    key={i}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black transition-all ${i === currentMoveIndex ? 'bg-indigo-600 text-white shadow-lg scale-110' :
-                      i < currentMoveIndex ? 'bg-indigo-600/20 text-indigo-400' : 'bg-slate-800 text-slate-500'
-                      }`}
-                  >
-                    {move}
-                  </div>
-                ))}
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                  <div
+                    className="absolute w-4 h-4 bg-white rounded-full border-[3px] border-[#1F1235] shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all duration-300 pointer-events-none top-1/2 -translate-y-1/2"
+                    style={{ left: `calc(${progress}% - 8px)` }}
+                  />
+                </div>
+              </div>
+
+              {/* Mode Operation (Corresponded Method Display) */}
+              <div className="bg-black/20 rounded-2xl p-4 border border-white/5">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Mode Operation</h4>
+                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar">
+                  {activeItem?.solutionMoves?.map((move, i) => (
+                    <div
+                      key={i}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black transition-all ${i === currentMoveIndex ? 'bg-indigo-600 text-white shadow-lg scale-110' :
+                        i < currentMoveIndex ? 'bg-indigo-600/20 text-indigo-400' : 'bg-slate-800 text-slate-500'
+                        }`}
+                    >
+                      {move}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-center items-center gap-8 pb-2">
+                <button
+                  onClick={handleStepBackward}
+                  className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 active:scale-90 transition-all border border-red-500/10"
+                >
+                  <SkipBack size={24} fill="currentColor" />
+                </button>
+                <button
+                  onClick={handleTogglePlay}
+                  className="w-18 h-18 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-3xl flex items-center justify-center text-white shadow-[0_15px_35px_rgba(99,102,241,0.4)] active:scale-95 transition-all p-5"
+                >
+                  {isPlaying ? <Pause size={32} fill="white" /> : <Play size={32} fill="white" className="ml-1" />}
+                </button>
+                <button
+                  onClick={handleStepForward}
+                  className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 active:scale-90 transition-all border border-blue-500/10"
+                >
+                  <SkipForward size={24} fill="currentColor" />
+                </button>
               </div>
             </div>
-
-            <div className="flex justify-center items-center gap-8 pb-2">
-              <button
-                onClick={handleStepBackward}
-                className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 active:scale-90 transition-all border border-red-500/10"
-              >
-                <SkipBack size={24} fill="currentColor" />
-              </button>
-              <button
-                onClick={handleTogglePlay}
-                className="w-18 h-18 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-3xl flex items-center justify-center text-white shadow-[0_15px_35px_rgba(99,102,241,0.4)] active:scale-95 transition-all p-5"
-              >
-                {isPlaying ? <Pause size={32} fill="white" /> : <Play size={32} fill="white" className="ml-1" />}
-              </button>
-              <button
-                onClick={handleStepForward}
-                className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 active:scale-90 transition-all border border-blue-500/10"
-              >
-                <SkipForward size={24} fill="currentColor" />
-              </button>
-            </div>
           </div>
-        </div>
+        )}
 
         <div className="w-full max-w-md space-y-5">
           {history.map((item, index) => (

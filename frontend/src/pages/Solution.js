@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronLeft } from 'lucide-react';
 import Cube3D from '../components/Cube3D';
+import GuidanceModal from '../components/GuidanceModal';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronLeft, Zap, Thermometer, Clock, Box, Trophy, PartyPopper, X } from 'lucide-react';
+import Confetti from 'react-confetti';
+import { Haptics, NotificationType } from '@capacitor/haptics';
+import { playMoveSound, playCelebrationSound } from '../utils/audio';
 import '../solution.css';
 
 const Solution = () => {
@@ -12,6 +16,9 @@ const Solution = () => {
   const [speed, setSpeed] = useState(800); // Animation duration in ms
   const [isAnimating, setIsAnimating] = useState(false);
   const [pendingMove, setPendingMove] = useState(null);
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const [isSolved, setIsSolved] = useState(false);
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   const solution = location.state?.solution;
   const initialCubeState = location.state?.cubeState;
@@ -24,6 +31,18 @@ const Solution = () => {
       navigate('/');
       return;
     }
+
+    // Show tour if first time seeing solution
+    const hasSeenSolutionTour = localStorage.getItem('hasSeenSolutionTour');
+    if (!hasSeenSolutionTour) {
+      setIsTourOpen(true);
+      localStorage.setItem('hasSeenSolutionTour', 'true');
+    }
+    // Track window resize for confetti
+    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
   }, [solution, navigate]);
 
 
@@ -37,12 +56,29 @@ const Solution = () => {
       setDisplayCubeState(nextFacelets);
     }
 
+    // Check if solution is complete
+    if (currentMoveIndex === solution?.moves.length - 1) {
+      if (!isSolved) {
+        setIsSolved(true);
+        playCelebrationSound();
+        try {
+          Haptics.notification({ type: NotificationType.Success });
+        } catch (e) { console.log('Haptics not available'); }
+      }
+    }
+
     // Small stabilization window to let React and Three.js sync their states
     setTimeout(() => {
       setIsAnimating(false);
       setPendingMove(null);
     }, 30);
-  }, []);
+  }, [currentMoveIndex, solution, isSolved]);
+
+  const getInverseMove = (move) => {
+    if (move.includes("'")) return move.replace("'", "");
+    if (move.includes("2")) return move;
+    return move + "'";
+  };
 
   const handleStepForward = useCallback(() => {
     if (isAnimating || !solution?.moves) return;
@@ -58,6 +94,25 @@ const Solution = () => {
       setIsPlaying(false);
     }
   }, [currentMoveIndex, isAnimating, solution]);
+
+  const handleStepBackward = useCallback(() => {
+    if (isAnimating || !solution?.moves || currentMoveIndex < 0) return;
+
+    const move = solution.moves[currentMoveIndex];
+    const inverse = getInverseMove(move.notation);
+
+    setIsAnimating(true);
+    setPendingMove(inverse);
+    setCurrentMoveIndex(prev => prev - 1);
+    setIsPlaying(false); // Stop auto-play when manually stepping back
+  }, [currentMoveIndex, isAnimating, solution]);
+
+  // Play sound when a move starts
+  useEffect(() => {
+    if (pendingMove) {
+      playMoveSound();
+    }
+  }, [pendingMove]);
 
   // Main Playback Loop
   useEffect(() => {
@@ -76,23 +131,19 @@ const Solution = () => {
   }, [isPlaying, isAnimating, handleStepForward, speed]);
 
   const togglePlay = () => {
-    if (!isPlaying && currentMoveIndex >= solution.moves.length - 1) {
-      // Restart if reached end
-      setCurrentMoveIndex(-1);
-      setDisplayCubeState(initialCubeState);
-    }
     setIsPlaying(!isPlaying);
   };
 
-  const skipBack = () => {
+  const resetToStart = () => {
     if (isAnimating) return;
     setCurrentMoveIndex(-1);
     setDisplayCubeState(initialCubeState);
     setIsPlaying(false);
+    setIsSolved(false); // Reset solved state
   };
 
   const resetCube = () => {
-    skipBack();
+    resetToStart();
   };
 
   if (!solution) return null;
@@ -104,6 +155,47 @@ const Solution = () => {
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[150px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[150px] rounded-full" />
       </div>
+
+      {isSolved && (
+        <>
+          <Confetti
+            width={windowSize.width}
+            height={windowSize.height}
+            recycle={false}
+            numberOfPieces={500}
+            gravity={0.15}
+          />
+          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-auto p-4">
+            <div className="bg-black/90 backdrop-blur-xl p-6 sm:p-8 rounded-[2rem] border border-yellow-500/30 shadow-[0_0_80px_rgba(234,179,8,0.4)] flex flex-col items-center animate-in fade-in zoom-in duration-500 scale-100 ring-2 ring-white/5 w-full max-w-sm relative">
+              <button
+                onClick={() => setIsSolved(false)}
+                className="absolute top-3 right-3 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors z-20"
+              >
+                <X size={18} className="text-white/70" />
+              </button>
+              <div className="absolute inset-0 bg-gradient-to-b from-yellow-500/10 to-transparent rounded-[2rem] pointer-events-none"></div>
+
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full flex items-center justify-center mb-4 shadow-2xl animate-bounce border-[3px] border-yellow-300 relative z-10">
+                <Trophy size={32} className="text-white drop-shadow-md sm:w-10 sm:h-10" />
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200 uppercase tracking-widest mb-2 text-center drop-shadow-sm relative z-10">
+                Solved!
+              </h2>
+
+              <p className="text-slate-300 font-medium text-sm text-center leading-relaxed relative z-10 max-w-[80%]">
+                You've successfully solved the cube!
+              </p>
+
+              <div className="mt-6 flex gap-4 relative z-10 pointer-events-auto w-full">
+                <button onClick={() => navigate('/manual')} className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 rounded-xl text-white text-xs sm:text-sm font-black uppercase tracking-wider transition-all shadow-lg hover:shadow-yellow-500/20 active:scale-95">
+                  Try Another Solve
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="relative z-10 max-w-lg mx-auto flex flex-col flex-1 w-full p-6 pt-10 pb-12 overflow-y-auto custom-scrollbar">
 
@@ -128,6 +220,17 @@ const Solution = () => {
               durationMs={speed}
             />
           </div>
+
+          {/* Current Move Notation Display */}
+          {pendingMove && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none">
+              <div className="bg-black/60 backdrop-blur-sm px-5 py-2 rounded-xl border border-white/20">
+                <span className="text-white font-mono text-2xl font-bold tracking-wider">
+                  {pendingMove}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Playback Progress Slider (Speed) */}
@@ -153,8 +256,8 @@ const Solution = () => {
         {/* Playback Controls */}
         <div className="flex items-center justify-center gap-6 mb-12">
           <button
-            onClick={skipBack}
-            className="w-14 h-14 bg-gradient-to-br from-rose-500 to-rose-700 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all"
+            onClick={handleStepBackward}
+            className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-700 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all font-bold"
           >
             <SkipBack size={24} fill="white" />
           </button>
@@ -166,7 +269,7 @@ const Solution = () => {
           </button>
           <button
             onClick={handleStepForward}
-            className="w-14 h-14 bg-gradient-to-br from-rose-500 to-rose-700 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all"
+            className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all font-bold"
           >
             <SkipForward size={24} fill="white" />
           </button>
@@ -190,16 +293,34 @@ const Solution = () => {
                   ? 'border-blue-500/50 shadow-[0_10px_30px_rgba(59,130,246,0.15)] bg-blue-500/10'
                   : 'border-white/5'}`}
                 >
-                  <div className="flex items-center gap-6">
-                    <span className="text-base font-black text-blue-400 w-8">{i + 1}.</span>
-                    <div className="flex flex-col">
-                      <span className="text-xl font-black text-white">{move.notation}</span>
+                  <div className="flex-1 px-4">
+                    <div className="flex items-center gap-4 mb-1">
+                      <span className="text-base font-black text-blue-400 w-6">{i + 1}.</span>
+                      <span className="text-2xl font-black text-white">{move.notation}</span>
+                      {move.hand && (
+                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[8px] font-black uppercase tracking-tighter rounded">
+                          {move.hand}
+                        </span>
+                      )}
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">
-                      ROTATE {move.notation[0]} FACE {move.notation.includes("'") ? 'COUNTER-CLOCKWISE' : 'CLOCKWISE'}
-                    </span>
+
+                    {move.grip && (
+                      <p className="text-[10px] text-slate-300 leading-tight mb-1 font-medium">
+                        {move.grip}
+                      </p>
+                    )}
+
+                    {move.tip && (
+                      <p className="text-[9px] text-amber-400/80 italic leading-tight">
+                        Tip: {move.tip}
+                      </p>
+                    )}
+
+                    {!move.grip && (
+                      <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">
+                        ROTATE {move.notation[0]} FACE {move.notation.includes("'") ? 'COUNTER-CLOCKWISE' : 'CLOCKWISE'}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -235,6 +356,34 @@ const Solution = () => {
         </button>
 
       </div>
+
+      {/* Guidance Tour */}
+      <GuidanceModal
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        steps={[
+          {
+            title: "Your Solution is Ready!",
+            description: "We've calculated the best way to solve your cube. Follow these steps carefully.",
+            icon: <Zap className="w-10 h-10 text-white" />
+          },
+          {
+            title: "The 3D Guide",
+            description: "The cube at the top will animate each move. You can drag to rotate and see it from any angle!",
+            icon: <Box className="w-10 h-10 text-white" />
+          },
+          {
+            title: "Control the Flow",
+            description: "Use Play to watch it happen, or Step through one by one. Adjust the speed if it's going too fast!",
+            icon: <Pause className="w-10 h-10 text-white" />
+          },
+          {
+            title: "Step-by-Step",
+            description: "Below the cube, you'll see a list of moves. 'R' means Right face clockwise, 'R\'' means counter-clockwise. Don't worry, we explain each one!",
+            icon: <Clock className="w-10 h-10 text-white" />
+          }
+        ]}
+      />
     </div>
   );
 };

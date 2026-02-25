@@ -222,3 +222,4 @@ If you encounter any issues:
 - [ ] Mobile app version
 - [ ] Voice commands for solving
 - [ ] Multi-language support
+

@@ -1,0 +1,27 @@
+# The secondary target index is used in Podfile.lock to distinguish between
+# the same pod in different targets. This is used by pod install.
+install! 'cocoapods', :deterministic_uuids => false
+
+# Uncomment this line to define a global platform for your project
+platform :ios, '13.0'
+
+# Flutter Podfile setup
+flutter_ios_podfile_setup = '/Users/anshik/flutter/packages/flutter_tools/bin/podhelper.rb'
+if File.exist?(flutter_ios_podfile_setup)
+  load flutter_ios_podfile_setup
+else
+  raise "Could not find podhelper.rb at #{flutter_ios_podfile_setup}"
+end
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+  end
+end

@@ -3,8 +3,12 @@
 # Start both frontend and backend servers
 echo "🚀 Starting Rubik's Cube Solver servers..."
 
-# Set Node.js path
-# export PATH="/usr/local/Cellar/node@18/18.20.8/bin:$PATH"
+# Set up NVM and Node.js path
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Set up Flutter and Dart path
+export PATH="/Users/anshik/flutter/bin:$PATH"
 
 # Start backend (Flutter/Dart) on port 8081
 echo "📡 Starting Flutter backend on port 8081..."

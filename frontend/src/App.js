@@ -19,7 +19,7 @@ import VideoSplashScreen from './components/VideoSplashScreen';
 function App() {
   // Debug logging
   console.log('React App is loading...');
-  console.log('API URL:', process.env.REACT_APP_API_URL || 'http://192.168.108.190:8081');
+  console.log('API URL:', process.env.REACT_APP_API_URL || 'http://192.168.109.225:8081');
 
   return (
     <ErrorBoundary>

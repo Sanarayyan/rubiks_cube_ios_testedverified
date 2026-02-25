@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -55,7 +56,17 @@ class _WebViewContainerState extends State<WebViewContainer> {
   void initState() {
     super.initState();
     
-    _controller = WebViewController()
+    final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    _controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFF0F172A))
       ..setNavigationDelegate(
@@ -76,6 +87,9 @@ class _WebViewContainerState extends State<WebViewContainer> {
       AndroidWebViewController.enableDebugging(true);
       (_controller.platform as AndroidWebViewController)
           .setMediaPlaybackRequiresUserGesture(false);
+    } else if (_controller.platform is WebKitWebViewController) {
+      (_controller.platform as WebKitWebViewController)
+          .setAllowsBackForwardNavigationGestures(true);
     }
 
 

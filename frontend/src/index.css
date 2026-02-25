@@ -6,10 +6,13 @@
 
     html,
     body {
-        height: auto;
-        min-height: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        position: fixed;
+        overscroll-behavior: none;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -124,10 +127,13 @@
     }
 
     @keyframes pointer-tap {
-        0%, 100% {
+
+        0%,
+        100% {
             transform: translateY(0) scale(1) rotate(-12deg);
             filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0));
         }
+
         50% {
             transform: translateY(12px) scale(0.85) rotate(-12deg);
             filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));

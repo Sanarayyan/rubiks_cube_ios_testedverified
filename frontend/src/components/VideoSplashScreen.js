@@ -39,14 +39,17 @@ const VideoSplashScreen = () => {
     return (
         <div
             className={`fixed inset-0 z-[9999] bg-[#020208] flex items-center justify-center transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
-            onClick={unmuteAndPlay}
         >
             <video
                 ref={videoRef}
                 autoPlay
+                muted
                 playsInline
+                webkit-playsinline="true"
+                controls={false}
+                disablePictureInPicture
                 onEnded={handleVideoEnd}
-                className="w-full h-full object-cover md:object-contain cursor-pointer"
+                className="w-full h-full object-cover md:object-contain pointer-events-none"
                 style={{ filter: 'contrast(1.1) brightness(0.9)' }}
             >
                 <source src={process.env.PUBLIC_URL + '/splash_video.mp4'} type="video/mp4" />

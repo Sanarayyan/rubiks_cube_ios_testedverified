@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use environment variable for API URL in production, fallback to local IP for mobile dev
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://192.168.109.225:8081';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
 
 // Create axios instance with default config
 const api = axios.create({

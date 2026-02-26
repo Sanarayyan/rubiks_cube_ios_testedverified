@@ -1,0 +1,18 @@
+# Node, IDE, OS
+node_modules
+.git
+.gitignore
+.idea
+.vscode
+.DS_Store
+
+# Dart & Flutter build outputs
+.dart_tool
+build
+.packages
+# pubspec.lock (removed from ignore to allow Docker COPY)
+
+# Python
+__pycache__
+*.pyc
+*.pyo

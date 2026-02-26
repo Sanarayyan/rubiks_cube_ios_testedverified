@@ -1,0 +1,12 @@
+🚀 Rubik's Cube Backend Server running on http://localhost:8081
+📊 Health check: http://localhost:8081/api/health
+2025-08-06T12:32:52.116094  0:00:00.020029 GET     [200] /api/health
+2025-08-06T12:33:23.240627  0:00:00.000421 GET     [200] /api/health
+2025-08-06T12:34:21.146400  0:00:00.000460 GET     [200] /api/health
+2025-08-06T12:34:40.458716  0:00:00.002606 POST    [200] /api/upload-image
+2025-08-06T12:34:40.480408  0:00:00.026281 POST    [200] /api/solve
+2025-08-06T12:34:50.186448  0:00:00.000549 POST    [200] /api/upload-image
+2025-08-06T12:34:50.192852  0:00:00.002000 POST    [200] /api/solve
+2025-08-06T12:35:53.534353  0:00:00.001549 POST    [200] /api/solve
+2025-08-06T12:41:49.611931  0:00:00.003320 POST    [200] /api/solve
+2025-08-06T12:42:25.858040  0:00:00.001847 POST    [200] /api/solve

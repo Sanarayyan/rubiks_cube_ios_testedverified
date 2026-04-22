@@ -36,8 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   
   # WebView to render React UI
-  webview_flutter: ^4.8.0
-  webview_flutter_android: ^3.16.2
+  webview_flutter: ^4.10.0
+  webview_flutter_android: 4.10.0
   
   # HTTP requests
   http: ^1.1.0
@@ -52,7 +52,7 @@ dependencies:
   # flutter_cube: ^0.0.5  # Not compatible with null safety
   
   # Image handling
-  image_picker: ^1.0.4
+  image_picker: ^1.1.2
   
   # Shared preferences for storing data
   shared_preferences: ^2.2.2

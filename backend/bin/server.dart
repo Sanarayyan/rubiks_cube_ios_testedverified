@@ -255,7 +255,8 @@ Future<Map<String, dynamic>> _callPythonSolver(List<String> colors) async {
       };
     }
     final colorsJson = jsonEncode(colors);
-    final result = await Process.run('python3', [pythonScript, colorsJson]);
+    final pythonPath = '$scriptDir/venv/bin/python3';
+    final result = await Process.run(pythonPath, [pythonScript, colorsJson]);
     if (result.exitCode != 0) {
       return {
         'success': false,

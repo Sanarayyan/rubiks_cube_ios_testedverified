@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Use environment variable for API URL in production, fallback to local IP for mobile dev
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+// Use environment variable for API URL in production, fallback to Render production URL
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://rubiks-cube-solver-3rur.onrender.com';
 
 // Create axios instance with default config
 const api = axios.create({

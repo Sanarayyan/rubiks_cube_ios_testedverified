@@ -80,6 +80,12 @@ class _WebViewContainerState extends State<WebViewContainer> {
             });
           },
         ),
+      )
+      ..addJavaScriptChannel(
+        'Logger',
+        onMessageReceived: (JavaScriptMessage message) {
+          debugPrint('JS: ${message.message}');
+        },
       );
 
     // Platform-specific configuration

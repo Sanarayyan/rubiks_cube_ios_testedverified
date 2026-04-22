@@ -21,3 +21,8 @@ backend/__pycache__/
 *.iml
 *.jks
 android/key.properties
+backend/venv/
+backend/history.json
+history.json
+venv/
+.env

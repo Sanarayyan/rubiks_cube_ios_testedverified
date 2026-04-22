@@ -6,11 +6,11 @@ install! 'cocoapods', :deterministic_uuids => false
 platform :ios, '13.0'
 
 # Flutter Podfile setup
-flutter_ios_podfile_setup = '/Users/anshik/flutter/packages/flutter_tools/bin/podhelper.rb'
+flutter_ios_podfile_setup = File.join(ENV['FLUTTER_ROOT'] || '/Users/arshadali/development/flutter', 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 if File.exist?(flutter_ios_podfile_setup)
   load flutter_ios_podfile_setup
 else
-  raise "Could not find podhelper.rb at #{flutter_ios_podfile_setup}"
+  raise "Could not find podhelper.rb at #{flutter_ios_podfile_setup}. Set FLUTTER_ROOT or update this path."
 end
 
 target 'Runner' do

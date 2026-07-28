@@ -13,24 +13,8 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Rubik's Cube Solver</title>
   </head>
-  <body>
+  <body style="margin: 0; background: #020208;">
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root">
-      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-        <div style="text-align: center;">
-          <h1>Rubik's Cube Solver</h1>
-          <p>Loading...</p>
-          <p style="font-size: 12px; opacity: 0.8;">If this message persists, check the console for errors.</p>
-        </div>
-      </div>
-    </div>
-    <script>
-      console.log('HTML loaded, waiting for React...');
-      setTimeout(function() {
-        if (document.getElementById('root').children.length === 1) {
-          console.error('React app failed to load within 5 seconds');
-        }
-      }, 5000);
-    </script>
+    <div id="root"></div>
   </body>
 </html> 

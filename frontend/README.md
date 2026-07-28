@@ -87,6 +87,16 @@ npm start
 npm run build
 ```
 
+### Production API URL
+Before creating a deployable build, set the backend URL:
+
+```bash
+REACT_APP_API_URL=https://your-backend.example.com npm run build
+```
+
+For local development, the frontend falls back to `http://localhost:8081`.
+For mobile or hosted production builds, do not leave the API URL pointing at localhost.
+
 ## 🔧 Key Improvements Made
 
 1. **Error Handling**: Added comprehensive error handling throughout the application

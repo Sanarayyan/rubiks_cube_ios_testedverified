@@ -1,6 +1,6 @@
 import React, { Suspense, useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, ArcballControls } from '@react-three/drei';
+import { ArcballControls } from '@react-three/drei';
 import * as THREE from 'three';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -15,15 +15,6 @@ const colorMap = {
 };
 
 const FACE = { U: 0, R: 1, F: 2, D: 3, L: 4, B: 5 };
-
-const FACE_INDICES = {
-  U: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-  R: [9, 10, 11, 12, 13, 14, 15, 16, 17],
-  F: [18, 19, 20, 21, 22, 23, 24, 25, 26],
-  D: [27, 28, 29, 30, 31, 32, 33, 34, 35],
-  L: [36, 37, 38, 39, 40, 41, 42, 43, 44],
-  B: [45, 46, 47, 48, 49, 50, 51, 52, 53],
-};
 
 const PERMUTATIONS = {
   U: {

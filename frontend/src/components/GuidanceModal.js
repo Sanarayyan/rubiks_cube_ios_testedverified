@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronRight, ChevronLeft, Info, MousePointer2, Box, LayoutGrid } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Info } from 'lucide-react';
 
 const GuidanceModal = ({ isOpen, onClose, steps }) => {
     const [currentStep, setCurrentStep] = useState(0);
@@ -55,6 +55,7 @@ const GuidanceModal = ({ isOpen, onClose, steps }) => {
                 {/* Close Button */}
                 <button 
                     onClick={onClose}
+                    aria-label="Close guide"
                     className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white transition-colors"
                 >
                     <X size={20} />

@@ -39,6 +39,8 @@ const NotFound = () => {
 
   const problems = validation?.errors || [];
   const isValid = validation?.isValid || false;
+  const hasColorCountError = colorCounts.some(item => item.isError);
+  const hasSolverError = !isValid && !hasColorCountError && problems.length > 0;
 
   return (
     <div className="h-screen w-full bg-[#0D061A] text-white flex flex-col items-center justify-start font-sans relative overflow-hidden">
@@ -59,10 +61,14 @@ const NotFound = () => {
           </button>
 
           <h1 className="text-3xl font-black text-white mb-2">
-            {isValid ? "Cube Is Ready!" : "Check Your Cube"}
+            {isValid ? "Cube Is Ready!" : hasSolverError ? "Solver Issue" : "Check Your Cube"}
           </h1>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-10 leading-relaxed">
-            {isValid ? "Everything looks perfect for solving" : "You’ve added too many of one color. Each color should appear exactly 9 times."}
+            {isValid
+              ? "Everything looks perfect for solving"
+              : hasSolverError
+                ? "Your colours look valid, but the solver could not finish this request."
+                : "Each colour should appear exactly 9 times."}
           </p>
 
           <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6">Colour Counts</h2>

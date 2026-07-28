@@ -1,61 +1,94 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
+
+const SPLASH_DURATION_MS = 6500;
+const FADE_DURATION_MS = 180;
 
 const VideoSplashScreen = () => {
     const navigate = useNavigate();
     const [fadeOut, setFadeOut] = useState(false);
+    const [videoVisible, setVideoVisible] = useState(false);
     const videoRef = useRef(null);
+    const navTimerRef = useRef(null);
+    const fallbackTimerRef = useRef(null);
 
-    useEffect(() => {
-        // Attempt to play with sound if possible
-        if (videoRef.current) {
-            videoRef.current.play().catch(error => {
-                console.log("Autoplay with sound was blocked:", error);
-            });
-        }
-
-        // Reduced transition time for an "instant" feel
-        const navTimer = setTimeout(() => {
-            setFadeOut(true);
-            // Navigate almost instantly after fade starts
-            setTimeout(() => navigate('/manual'), 150);
-        }, 6500);
-
-        return () => clearTimeout(navTimer);
+    const finishSplash = useCallback(() => {
+        setFadeOut(true);
+        setTimeout(() => navigate('/manual'), FADE_DURATION_MS);
     }, [navigate]);
 
-    const handleVideoEnd = () => {
-        setFadeOut(true);
-        setTimeout(() => navigate('/manual'), 150);
-    };
-
-    const unmuteAndPlay = () => {
-        if (videoRef.current) {
-            videoRef.current.muted = false;
-            videoRef.current.play();
+    const scheduleFinish = useCallback(() => {
+        if (navTimerRef.current) {
+            return;
         }
+
+        navTimerRef.current = setTimeout(finishSplash, SPLASH_DURATION_MS);
+    }, [finishSplash]);
+
+    const playSplash = useCallback(() => {
+        const video = videoRef.current;
+
+        if (!video) {
+            return;
+        }
+
+        video.muted = true;
+
+        video.play()
+            .then(() => {
+                setVideoVisible(true);
+                scheduleFinish();
+            })
+            .catch(() => {
+                finishSplash();
+            });
+    }, [finishSplash, scheduleFinish]);
+
+    useEffect(() => {
+        fallbackTimerRef.current = setTimeout(playSplash, 1200);
+
+        return () => {
+            clearTimeout(navTimerRef.current);
+            clearTimeout(fallbackTimerRef.current);
+        };
+    }, [playSplash]);
+
+    const handleVideoEnd = () => {
+        finishSplash();
     };
 
     return (
         <div
             className={`fixed inset-0 z-[9999] bg-[#020208] flex items-center justify-center transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
         >
+            {!videoVisible && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#020208]">
+                    <img
+                        src={logo}
+                        alt=""
+                        className="w-20 h-20 object-contain opacity-90 animate-pulse"
+                        draggable={false}
+                    />
+                </div>
+            )}
+
             <video
                 ref={videoRef}
                 autoPlay
                 muted
                 playsInline
                 webkit-playsinline="true"
+                preload="auto"
                 controls={false}
                 disablePictureInPicture
+                onLoadedData={playSplash}
+                onCanPlay={playSplash}
                 onEnded={handleVideoEnd}
-                className="w-full h-full object-cover md:object-contain pointer-events-none"
+                className={`w-full h-full object-cover md:object-contain pointer-events-none transition-opacity duration-300 ${videoVisible ? 'opacity-100' : 'opacity-0'}`}
                 style={{ filter: 'contrast(1.1) brightness(0.9)' }}
             >
                 <source src={process.env.PUBLIC_URL + '/splash_video.mp4'} type="video/mp4" />
-                <div className="text-white text-center">
-                    <h1 className="text-4xl font-black tracking-widest animate-pulse">RUBIK'S SOLVER</h1>
-                </div>
             </video>
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40 pointer-events-none" />

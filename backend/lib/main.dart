@@ -65,10 +65,8 @@ Response _healthHandler(Request request) {
 }
 
 Future<Response> _solveCubeHandler(Request request) async {
-  print('Received /api/solve request'); // Log incoming request
   try {
     final body = await request.readAsString();
-    print('Request body: ' + body); // Log request body
     final data = jsonDecode(body) as Map<String, dynamic>;
     
     final colors = data['colors'] as List<dynamic>;
@@ -89,7 +87,6 @@ Future<Response> _solveCubeHandler(Request request) async {
     // Solve cube
     final solver = CubeSolver();
     final solution = solver.solveCube(cubeState);
-    print('Solution: ' + jsonEncode(solution.toJson())); // Log solution
     if (solution.success) {
       return Response.ok(
         jsonEncode({
@@ -102,11 +99,15 @@ Future<Response> _solveCubeHandler(Request request) async {
         headers: {'content-type': 'application/json'},
       );
     } else {
-      print('Could not solve cube: ' + (solution.error ?? ''));
-      return Response(400,
+      final error = solution.error ?? 'Failed to solve cube';
+      final isSolverUnavailable = _isSolverUnavailable(error);
+      return Response(isSolverUnavailable ? 503 : 422,
         body: jsonEncode({
-          'error': 'Could not solve cube',
-          'details': solution.error
+          'success': false,
+          'error': isSolverUnavailable
+              ? 'Solver service unavailable'
+              : 'Could not solve cube',
+          'details': error
         }),
         headers: {'content-type': 'application/json'},
       );
@@ -118,6 +119,15 @@ Future<Response> _solveCubeHandler(Request request) async {
       headers: {'content-type': 'application/json'},
     );
   }
+}
+
+bool _isSolverUnavailable(String error) {
+  final normalized = error.toLowerCase();
+  return normalized.contains('failed to call python solver') ||
+      normalized.contains('python solver not found') ||
+      normalized.contains('pathaccessexception') ||
+      normalized.contains('permission denied') ||
+      normalized.contains('operation not permitted');
 }
 
 Future<Response> _uploadImageHandler(Request request) async {

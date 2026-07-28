@@ -16,8 +16,9 @@ echo "🧱 Building React frontend..."
 if command -v npm >/dev/null 2>&1; then
   pushd frontend >/dev/null
   npm ci || npm install
-  # Set production API URL (change this to your actual backend URL)
-  export REACT_APP_API_URL="https://rubiks-cube-solver-3rur.onrender.com/"
+  # Set production API URL. Override this before running the script if needed:
+  # REACT_APP_API_URL="https://your-backend.example.com" ./build_app.sh
+  export REACT_APP_API_URL="${REACT_APP_API_URL:-https://rubiks-cube-solver-3rur.onrender.com}"
   npm run build
   popd >/dev/null
 else

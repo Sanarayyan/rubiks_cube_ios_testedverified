@@ -1,11 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { checkAppVersion, shouldCheckAppVersion } from '../services/versionCheck';
 
-const isUpdateResponse = (value) => (
-  value &&
-  value.updateAvailable === true &&
-  (value.action === 'mandatory' || value.action === 'optional')
+const field = (value, camelCaseKey, snakeCaseKey) => (
+  value?.[camelCaseKey] ?? value?.[snakeCaseKey]
 );
+
+export const getSelectedVersionAction = (value) => {
+  if (!value) {
+    return 'no_action';
+  }
+
+  const canContinue = field(value, 'canContinue', 'can_continue');
+
+  if (value.action === 'mandatory' || canContinue === false) {
+    return 'mandatory';
+  }
+
+  if (value.action === 'optional') {
+    return 'optional';
+  }
+
+  return 'no_action';
+};
+
+const normalizeUpdateResponse = (value) => {
+  const action = getSelectedVersionAction(value);
+
+  if (action === 'no_action') {
+    return null;
+  }
+
+  return {
+    action,
+    title: value.title,
+    description: value.description,
+    storeUrl: field(value, 'storeUrl', 'store_url'),
+  };
+};
 
 const openStore = (storeUrl) => {
   if (!storeUrl) {
@@ -71,19 +102,22 @@ const VersionUpdateGate = () => {
     let active = true;
 
     if (!shouldCheckAppVersion()) {
+      console.info('[VersionHub] selected popup action:', 'no_action');
       return undefined;
     }
 
     checkAppVersion()
       .then((result) => {
-        if (active && isUpdateResponse(result)) {
-          setUpdate(result);
+        const normalizedUpdate = normalizeUpdateResponse(result);
+        const selectedAction = normalizedUpdate?.action || 'no_action';
+        console.info('[VersionHub] selected popup action:', selectedAction);
+
+        if (active && normalizedUpdate) {
+          setUpdate(normalizedUpdate);
         }
       })
       .catch((error) => {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('Version check skipped:', error.message);
-        }
+        console.warn('[VersionHub] version check failed:', error.message);
       });
 
     return () => {

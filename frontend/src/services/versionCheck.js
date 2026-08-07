@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 
 const DEFAULT_VERSION_CHECK_PATH = '/api/v1/version-check';
+const DEFAULT_VERSION_CHECK_URL = 'https://version-hub-1028525309597.us-central1.run.app/api/v1/version-check';
 const DEFAULT_APPLICATION_NAME = 'rubiks_suite_solver';
 const DEFAULT_APP_VERSION = '1.0.0';
 
@@ -26,7 +27,7 @@ const getVersionCheckUrl = () => {
   const baseUrl = process.env.REACT_APP_VERSION_HUB_URL;
 
   if (!baseUrl) {
-    return '';
+    return DEFAULT_VERSION_CHECK_URL;
   }
 
   return `${trimTrailingSlash(baseUrl)}${DEFAULT_VERSION_CHECK_PATH}`;
@@ -40,12 +41,23 @@ export const versionCheckConfig = {
   apiKey: process.env.REACT_APP_VERSION_HUB_API_KEY || '',
 };
 
+export const buildVersionCheckBody = () => ({
+  application_name: versionCheckConfig.applicationName,
+  platform: versionCheckConfig.platform,
+  version: versionCheckConfig.appVersion,
+});
+
 export const shouldCheckAppVersion = () => Boolean(versionCheckConfig.url && versionCheckConfig.apiKey);
 
 export const checkAppVersion = async () => {
   if (!shouldCheckAppVersion()) {
+    console.info('[VersionHub] version check skipped: missing URL or API key');
     return null;
   }
+
+  const requestBody = buildVersionCheckBody();
+  console.info('[VersionHub] request URL:', versionCheckConfig.url);
+  console.info('[VersionHub] request body:', requestBody);
 
   const response = await fetch(versionCheckConfig.url, {
     method: 'POST',
@@ -53,16 +65,16 @@ export const checkAppVersion = async () => {
       'Content-Type': 'application/json',
       'X-App-Key': versionCheckConfig.apiKey,
     },
-    body: JSON.stringify({
-      application_name: versionCheckConfig.applicationName,
-      platform: versionCheckConfig.platform,
-      version: versionCheckConfig.appVersion,
-    }),
+    body: JSON.stringify(requestBody),
   });
+
+  const responseBody = await response.text();
+  console.info('[VersionHub] response status:', response.status);
+  console.info('[VersionHub] response body:', responseBody);
 
   if (!response.ok) {
     throw new Error(`Version check failed with status ${response.status}`);
   }
 
-  return response.json();
+  return responseBody ? JSON.parse(responseBody) : null;
 };

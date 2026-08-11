@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
 
 const SPLASH_DURATION_MS = 6500;
 const FADE_DURATION_MS = 180;
@@ -62,16 +61,7 @@ const VideoSplashScreen = () => {
         <div
             className={`fixed inset-0 z-[9999] bg-[#020208] flex items-center justify-center transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
         >
-            {!videoVisible && (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#020208]">
-                    <img
-                        src={logo}
-                        alt=""
-                        className="w-20 h-20 object-contain opacity-90 animate-pulse"
-                        draggable={false}
-                    />
-                </div>
-            )}
+            {!videoVisible && <div className="absolute inset-0 bg-[#020208]" />}
 
             <video
                 ref={videoRef}

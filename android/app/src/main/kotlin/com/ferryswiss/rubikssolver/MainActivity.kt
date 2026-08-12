@@ -1,4 +1,4 @@
-package com.rubikscubesolver.app
+package com.ferryswiss.rubikssolver
 
 import io.flutter.embedding.android.FlutterActivity
 

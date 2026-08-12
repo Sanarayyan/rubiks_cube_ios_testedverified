@@ -10,6 +10,7 @@ echo "🚀 Building Rubik's Cube Solver for $BUILD_TARGET..."
 
 # Set environment variables
 export ANDROID_SDK_ROOT=$HOME/Library/Android/sdk
+export PATH="$HOME/development/flutter/bin:$PATH"
 export PATH="/usr/local/opt/openjdk/bin:$PATH"
 APP_VERSION="$(awk '/^version:/ {print $2; exit}' pubspec.yaml | cut -d+ -f1)"
 

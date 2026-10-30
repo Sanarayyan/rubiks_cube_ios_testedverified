@@ -1,0 +1,30 @@
+[
+  {
+    "check": "All 18 move variants agree between input and animation models",
+    "passed": true
+  },
+  {
+    "check": "Production solver: fast",
+    "status": 200,
+    "passed": true,
+    "moves": [
+      "D'",
+      "L2",
+      "F",
+      "U'",
+      "R'"
+    ]
+  },
+  {
+    "check": "Production solver: beginner",
+    "status": 200,
+    "passed": true,
+    "moves": [
+      "D'",
+      "L2",
+      "F",
+      "U'",
+      "R'"
+    ]
+  }
+]

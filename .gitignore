@@ -12,7 +12,10 @@ frontend/build/
 assets/www/
 build/
 android/app/build/
-ios/Flutter/
+ios/Flutter/*
+!ios/Flutter/Debug.xcconfig
+!ios/Flutter/Release.xcconfig
+!ios/Flutter/AppFrameworkInfo.plist
 macos/Flutter/ephemeral/
 linux/flutter/
 windows/flutter/

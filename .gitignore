@@ -1,6 +1,10 @@
 .DS_Store
 .idea/
 .vscode/
+.env
+.env.*
+!.env.example
+!frontend/.env.example
 .nvm/
 node_modules/
 frontend/node_modules/

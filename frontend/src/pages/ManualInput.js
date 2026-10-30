@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Box, Smartphone, RotateCcw, Play, LayoutGrid, MousePointer2, Info, Zap, Activity, Cpu, Orbit, Sparkles, AlertCircle } from 'lucide-react';
-import { cubeAPI, generateSolvedCube, validateCubeStateDetailed } from '../services/api';
+import { Box, RotateCcw, Play, LayoutGrid, MousePointer2, Info, Zap, Orbit, Sparkles } from 'lucide-react';
+import { cubeAPI, generateSolvedCube, getFriendlySolveError, validateCubeStateDetailed } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 import CubeNet2D from '../components/CubeNet2D';
 import Cube3D from '../components/Cube3D';
@@ -49,10 +49,6 @@ const ManualInput = () => {
             }
         }
     }, []);
-
-    const notifyCenterBlocked = () => {
-        // No longer used as centers are unlocked, but keeping for reference or removing if clean
-    };
 
     const colors = ['W', 'O', 'B', 'Y', 'R', 'G'];
     const faces = [
@@ -122,26 +118,30 @@ const ManualInput = () => {
                     state: { solution: result.solution, cubeState },
                 });
             } else {
-                const errorMsg = result.error && result.error.includes("Probably cubestring is invalid")
-                    ? "Looks like the colors are right, but they’re placed on the wrong sides. Please recheck the cube before solving."
-                    : (result.error || 'The cube is in an impossible state. Please check your colors.');
+                const errorMsg = getFriendlySolveError(result.error);
 
                 showError(errorMsg);
                 const errorValidation = {
                     isValid: false,
-                    errors: [errorMsg]
+                    errors: [errorMsg],
+                    technicalDetails: result.error
                 };
                 navigate('/notfound', { state: { cubeState, validation: errorValidation } });
             }
         } catch (error) {
             console.error('Solve cube error:', error);
-            const isNetworkError = !error.response;
-            if (isNetworkError) {
-                showError(`Server Unreachable (at ${cubeAPI.baseURL}): Please check your internet connection and ensure the backend is live.`);
-            } else {
-                const errorMsg = error.response?.data?.error || error.message || 'Server error occurred';
-                showError(`Solve Failed (at ${cubeAPI.baseURL}): ${errorMsg}`);
-            }
+            const errorMsg = getFriendlySolveError(error.message);
+            showError(errorMsg);
+            navigate('/notfound', {
+                state: {
+                    cubeState,
+                    validation: {
+                        isValid: false,
+                        errors: [errorMsg],
+                        technicalDetails: error.message
+                    }
+                }
+            });
         } finally {
             setIsLoading(false);
         }
@@ -285,7 +285,7 @@ const ManualInput = () => {
                                 <div className="absolute top-[70%] left-1/2 -translate-x-1/2 pointer-events-none z-30 flex flex-col items-center w-full px-10">
                                     <div className="bg-[#1F1235]/90 backdrop-blur-2xl px-6 py-4 rounded-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col items-center gap-1 animate-in fade-in zoom-in duration-500">
                                         <span className="text-xs font-black text-white uppercase tracking-[0.1em] leading-normal text-center">
-                                            Double-tap to choose a color
+                                            Tap to choose a color
                                         </span>
                                         <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest text-center opacity-90">
                                             Match your real cube colors
@@ -337,6 +337,7 @@ const ManualInput = () => {
                 <div className="flex items-center gap-3 w-full max-w-sm mx-auto">
                     <button
                         onClick={resetCube}
+                        aria-label="Reset cube"
                         className="w-16 h-16 rounded-[2rem] bg-[#1F1235]/80 backdrop-blur-xl border border-white/10 flex items-center justify-center text-slate-400 active:scale-90 transition-all shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
                     >
                         <RotateCcw size={22} />
@@ -348,7 +349,10 @@ const ManualInput = () => {
                         className={`flex-1 h-14 rounded-3xl font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 border border-white/10 ${isLoading ? 'bg-slate-800 text-slate-500' : 'bg-gradient-to-r from-blue-600 via-purple-600 to-red-500 text-white shadow-blue-500/20'}`}
                     >
                         {isLoading ? (
-                            <RotateCcw className="w-5 h-5 animate-spin" />
+                            <>
+                                <RotateCcw className="w-5 h-5 animate-spin" />
+                                <span>Solving...</span>
+                            </>
                         ) : (
                             <>
                                 <Play size={16} fill="white" />
@@ -366,6 +370,7 @@ const ManualInput = () => {
 
                 <button
                     onClick={() => setInputMode('3d')}
+                    aria-label="3D cube input"
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all relative ${inputMode === '3d' ? 'bg-white text-[#1F1235] shadow-[0_4px_20px_rgba(255,255,255,0.2)]' : 'text-slate-400'}`}
                 >
                     <Box size={20} strokeWidth={2.5} />
@@ -373,6 +378,7 @@ const ManualInput = () => {
                 </button>
                 <button
                     onClick={() => setInputMode('grid')}
+                    aria-label="Grid input"
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all relative ${inputMode === 'grid' ? 'bg-white text-[#1F1235] shadow-[0_4px_20px_rgba(255,255,255,0.2)]' : 'text-slate-400'}`}
                 >
                     <LayoutGrid size={20} strokeWidth={2.5} />
@@ -380,6 +386,7 @@ const ManualInput = () => {
                 </button>
                 <button
                     onClick={() => setInputMode('net')}
+                    aria-label="Cube net input"
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all relative ${inputMode === 'net' ? 'bg-white text-[#1F1235] shadow-[0_4px_20px_rgba(255,255,255,0.2)]' : 'text-slate-400'}`}
                 >
                     <div className="flex flex-col items-center gap-[1px]">
@@ -394,6 +401,7 @@ const ManualInput = () => {
 
                 <button
                     onClick={() => setIsTourOpen(true)}
+                    aria-label="Open guide"
                     className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all text-slate-400 hover:text-white"
                 >
                     <Info size={20} strokeWidth={2.5} />
@@ -425,7 +433,7 @@ const ManualInput = () => {
                     },
                     {
                         title: "Solve It!",
-                        description: "When your screen cube looks just like your real cube, hit 'Solve Cube'. We'll show you exactly how to fix it!",
+                        description: "When your screen cube looks just like your real cube, hit 'Solve My Cube'. We'll show you exactly how to fix it!",
                         icon: <Zap className="w-10 h-10 text-white" />
                     }
                 ]}
@@ -435,6 +443,7 @@ const ManualInput = () => {
             {solution && (
                 <button
                     onClick={viewSolution}
+                    aria-label="View solution"
                     className="fixed top-36 right-4 w-12 h-12 bg-gradient-to-br from-blue-500 via-yellow-500 to-red-500 text-white rounded-full shadow-2xl flex items-center justify-center animate-bounce z-50 border-2 border-white/20"
                 >
                     <Play size={20} fill="white" className="drop-shadow-lg" />

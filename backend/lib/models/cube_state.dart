@@ -1,4 +1,3 @@
-import 'dart:math';
 
 class CubeState {
   // Face representation: U, R, F, D, L, B

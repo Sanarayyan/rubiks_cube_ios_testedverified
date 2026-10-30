@@ -40,19 +40,19 @@ class _MeshBackgroundState extends State<MeshBackground> with TickerProviderStat
             return Stack(
               children: [
                 _buildOrb(
-                  color: const Color(0xFF38BDF8).withOpacity(0.15),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                   size: 400,
                   top: -100 + (20 * (_controller.value)),
                   right: -100 + (30 * (1 - _controller.value)),
                 ),
                 _buildOrb(
-                  color: const Color(0xFF818CF8).withOpacity(0.15),
+                  color: const Color(0xFF818CF8).withValues(alpha: 0.15),
                   size: 500,
                   bottom: -150 + (40 * _controller.value),
                   left: -150 + (20 * _controller.value),
                 ),
                 _buildOrb(
-                  color: const Color(0xFF2DD4BF).withOpacity(0.1),
+                  color: const Color(0xFF2DD4BF).withValues(alpha: 0.1),
                   size: 300,
                   top: 200 + (50 * (0.5 - _controller.value).abs()),
                   left: -50,
@@ -69,9 +69,9 @@ class _MeshBackgroundState extends State<MeshBackground> with TickerProviderStat
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.2),
+                Colors.black.withValues(alpha: 0.2),
                 Colors.transparent,
-                Colors.black.withOpacity(0.4),
+                Colors.black.withValues(alpha: 0.4),
               ],
             ),
           ),

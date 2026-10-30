@@ -46,7 +46,7 @@ class _ManualInputScreenState extends State<ManualInputScreen> {
                                 child: Text(
                                   'TAP SQUARES TO CHANGE COLORS',
                                   style: TextStyle(
-                                    color: AppColors.primary.withOpacity(0.8),
+                                    color: AppColors.primary.withValues(alpha: 0.8),
                                     fontSize: 10,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 2,
@@ -60,11 +60,11 @@ class _ManualInputScreenState extends State<ManualInputScreen> {
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Icon(Icons.construction_rounded, color: AppColors.textMuted, size: 48),
+                                            const Icon(Icons.construction_rounded, color: AppColors.textMuted, size: 48),
                                             const SizedBox(height: 16),
                                             Text(
                                               '${cubeProvider.inputMode.toUpperCase()} VIEW COMING SOON',
-                                              style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold),
+                                              style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -160,7 +160,7 @@ class _ManualInputScreenState extends State<ManualInputScreen> {
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
@@ -175,7 +175,7 @@ class _ManualInputScreenState extends State<ManualInputScreen> {
                     color: isSelected ? AppColors.primary : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: isSelected ? [
-                      BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 8)
+                      BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 8)
                     ] : null,
                   ),
                   child: Text(
@@ -203,9 +203,9 @@ class _ManualInputScreenState extends State<ManualInputScreen> {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.03),
+            color: Colors.white.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
           ),
           child: child,
         ),
@@ -220,7 +220,7 @@ class _ManualInputScreenState extends State<ManualInputScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),

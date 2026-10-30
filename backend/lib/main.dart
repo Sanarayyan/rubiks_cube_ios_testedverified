@@ -4,14 +4,12 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
-import 'package:path/path.dart' as path;
 
 import 'models/cube_state.dart';
 import 'services/cube_solver.dart';
-import 'services/image_processor.dart';
 
 void main(List<String> arguments) async {
-  print('main.dart started'); // Debug print to confirm execution
+  stdout.writeln('main.dart started');
 
   // Create router
   final router = Router();
@@ -31,10 +29,10 @@ void main(List<String> arguments) async {
 
   // Start server
   final port = int.parse(Platform.environment['PORT'] ?? '8081');
-  final server = await io.serve(handler, InternetAddress.anyIPv4, port);
+  await io.serve(handler, InternetAddress.anyIPv4, port);
   
-  print('🚀 Rubik\'s Cube Backend Server running on http://localhost:$port');
-  print('📊 Health check: http://localhost:$port/api/health');
+  stdout.writeln('🚀 Rubik\'s Cube Backend Server running on http://localhost:$port');
+  stdout.writeln('📊 Health check: http://localhost:$port/api/health');
 }
 
 // Handler functions
@@ -65,15 +63,13 @@ Response _healthHandler(Request request) {
 }
 
 Future<Response> _solveCubeHandler(Request request) async {
-  print('Received /api/solve request'); // Log incoming request
   try {
     final body = await request.readAsString();
-    print('Request body: ' + body); // Log request body
     final data = jsonDecode(body) as Map<String, dynamic>;
     
     final colors = data['colors'] as List<dynamic>;
     if (colors.length != 54) {
-      print('Invalid cube data: expected 54 colors');
+      stdout.writeln('Invalid cube data: expected 54 colors');
       return Response(400,
         body: jsonEncode({'error': 'Invalid cube data: expected 54 colors'}),
         headers: {'content-type': 'application/json'},
@@ -89,7 +85,6 @@ Future<Response> _solveCubeHandler(Request request) async {
     // Solve cube
     final solver = CubeSolver();
     final solution = solver.solveCube(cubeState);
-    print('Solution: ' + jsonEncode(solution.toJson())); // Log solution
     if (solution.success) {
       return Response.ok(
         jsonEncode({
@@ -102,17 +97,21 @@ Future<Response> _solveCubeHandler(Request request) async {
         headers: {'content-type': 'application/json'},
       );
     } else {
-      print('Could not solve cube: ' + (solution.error ?? ''));
-      return Response(400,
+      final error = solution.error ?? 'Failed to solve cube';
+      final isSolverUnavailable = _isSolverUnavailable(error);
+      return Response(isSolverUnavailable ? 503 : 422,
         body: jsonEncode({
-          'error': 'Could not solve cube',
-          'details': solution.error
+          'success': false,
+          'error': isSolverUnavailable
+              ? 'Solver service unavailable'
+              : 'Could not solve cube',
+          'details': error
         }),
         headers: {'content-type': 'application/json'},
       );
     }
   } catch (e) {
-    print('Internal server error: ' + e.toString());
+    stdout.writeln('Internal server error: $e');
     return Response(500,
       body: jsonEncode({'error': 'Internal server error: $e'}),
       headers: {'content-type': 'application/json'},
@@ -120,10 +119,19 @@ Future<Response> _solveCubeHandler(Request request) async {
   }
 }
 
+bool _isSolverUnavailable(String error) {
+  final normalized = error.toLowerCase();
+  return normalized.contains('failed to call python solver') ||
+      normalized.contains('python solver not found') ||
+      normalized.contains('pathaccessexception') ||
+      normalized.contains('permission denied') ||
+      normalized.contains('operation not permitted');
+}
+
 Future<Response> _uploadImageHandler(Request request) async {
   try {
     // Handle multipart form data for image upload
-    final body = await request.readAsString();
+    await request.readAsString();
     
     // For now, return a mock response
     // In a real implementation, you'd process the uploaded image
@@ -150,7 +158,7 @@ Response _getHistoryHandler(Request request) {
       'history': [
         {
           'id': 1,
-          'created_at': DateTime.now().subtract(Duration(hours: 1)).toIso8601String(),
+          'created_at': DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
           'total_moves': 20,
           'solved': true,
         }

@@ -34,7 +34,7 @@ class ImageUploadScreen extends StatelessWidget {
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.accent.withOpacity(0.2), width: 2),
+                          border: Border.all(color: AppColors.accent.withValues(alpha: 0.2), width: 2),
                         ),
                       ),
                       Container(
@@ -42,14 +42,14 @@ class ImageUploadScreen extends StatelessWidget {
                         height: 170,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.accent.withOpacity(0.5), width: 1),
+                          border: Border.all(color: AppColors.accent.withValues(alpha: 0.5), width: 1),
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.all(40),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.accent.withOpacity(0.05),
+                          color: AppColors.accent.withValues(alpha: 0.05),
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(100),
@@ -80,7 +80,7 @@ class ImageUploadScreen extends StatelessWidget {
                   child: Text(
                     'Our advanced AI will identify the colors of each face automatically. This feature is being tuned for precision.',
                     style: TextStyle(
-                      color: AppColors.textSecondary.withOpacity(0.7),
+                      color: AppColors.textSecondary.withValues(alpha: 0.7),
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -115,7 +115,7 @@ class ImageUploadScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text(
+                        child: const Text(
                           'USE MANUAL INPUT INSTEAD',
                           style: TextStyle(
                             color: AppColors.textSecondary,

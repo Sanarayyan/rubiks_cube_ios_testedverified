@@ -20,9 +20,9 @@ class SolutionDisplayWidget extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +32,7 @@ class SolutionDisplayWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.1),
+                      color: AppColors.accent.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -115,7 +115,7 @@ class SolutionDisplayWidget extends StatelessWidget {
         const SizedBox(width: 12),
         _buildInfoChip(Icons.multiple_stop_rounded, '${solution.moves.length} Moves'),
         const SizedBox(width: 12),
-        _buildInfoChip(Icons.psychology_outlined, solution.algorithm ?? 'AI'),
+        _buildInfoChip(Icons.psychology_outlined, solution.algorithm),
       ],
     );
   }
@@ -124,7 +124,7 @@ class SolutionDisplayWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -145,9 +145,9 @@ class SolutionDisplayWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.05),
+        color: AppColors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -169,9 +169,9 @@ class SolutionDisplayWidget extends StatelessWidget {
       width: 100,
       margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -2,11 +2,17 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Cube3D from '../components/Cube3D';
 import GuidanceModal from '../components/GuidanceModal';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronLeft, Zap, Thermometer, Clock, Box, Trophy, PartyPopper, X } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronLeft, Zap, Clock, Box, Trophy, X } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { Haptics, NotificationType } from '@capacitor/haptics';
 import { playMoveSound, playCelebrationSound } from '../utils/audio';
 import '../solution.css';
+
+const notifyFlutter = (payload) => {
+  if (window.FlutterBridge?.postMessage) {
+    window.FlutterBridge.postMessage(JSON.stringify(payload));
+  }
+};
 
 const Solution = () => {
   const location = useLocation();
@@ -51,20 +57,29 @@ const Solution = () => {
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
 
+  const currentMoveIndexRef = useRef(currentMoveIndex);
+  useEffect(() => { currentMoveIndexRef.current = currentMoveIndex; }, [currentMoveIndex]);
+
+  const isSolvedRef = useRef(isSolved);
+  useEffect(() => { isSolvedRef.current = isSolved; }, [isSolved]);
+
   const handleMoveDone = useCallback((nextFacelets) => {
     if (nextFacelets) {
       setDisplayCubeState(nextFacelets);
     }
 
     // Check if solution is complete
-    if (currentMoveIndex === solution?.moves.length - 1) {
-      if (!isSolved) {
-        setIsSolved(true);
-        playCelebrationSound();
-        try {
-          Haptics.notification({ type: NotificationType.Success });
-        } catch (e) { console.log('Haptics not available'); }
-      }
+    if (currentMoveIndexRef.current === solution?.moves.length - 1 && !isSolvedRef.current) {
+      setIsSolved(true);
+      notifyFlutter({
+        type: 'cube_solved',
+        source: 'solution_screen',
+        timestamp: Date.now(),
+      });
+      playCelebrationSound();
+      try {
+        Haptics.notification({ type: NotificationType.Success });
+      } catch (e) { console.log('Haptics not available'); }
     }
 
     // Small stabilization window to let React and Three.js sync their states
@@ -72,7 +87,7 @@ const Solution = () => {
       setIsAnimating(false);
       setPendingMove(null);
     }, 30);
-  }, [currentMoveIndex, solution, isSolved]);
+  }, [solution]);
 
   const getInverseMove = (move) => {
     if (move.includes("'")) return move.replace("'", "");
@@ -169,6 +184,7 @@ const Solution = () => {
             <div className="bg-black/90 backdrop-blur-xl p-6 sm:p-8 rounded-[2rem] border border-yellow-500/30 shadow-[0_0_80px_rgba(234,179,8,0.4)] flex flex-col items-center animate-in fade-in zoom-in duration-500 scale-100 ring-2 ring-white/5 w-full max-w-sm relative">
               <button
                 onClick={() => setIsSolved(false)}
+                aria-label="Close solved message"
                 className="absolute top-3 right-3 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors z-20"
               >
                 <X size={18} className="text-white/70" />
@@ -204,6 +220,7 @@ const Solution = () => {
 
           <button
             onClick={resetCube}
+            aria-label="Replay solution"
             className="w-10 h-10 bg-blue-500/20 backdrop-blur-md rounded-xl flex items-center justify-center text-blue-400 border border-white/5 active:scale-90 transition-all"
           >
             <RotateCcw size={18} />
@@ -242,6 +259,7 @@ const Solution = () => {
           </div>
           <div className="relative group">
             <input
+              aria-label="Animation speed"
               type="range"
               min="200"
               max="1500"
@@ -257,18 +275,21 @@ const Solution = () => {
         <div className="flex items-center justify-center gap-6 mb-12">
           <button
             onClick={handleStepBackward}
+            aria-label="Previous move"
             className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-700 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all font-bold"
           >
             <SkipBack size={24} fill="white" />
           </button>
           <button
             onClick={togglePlay}
+            aria-label={isPlaying ? 'Pause solution' : 'Play solution'}
             className="w-18 h-18 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-3xl flex items-center justify-center text-white shadow-[0_15px_35px_rgba(99,102,241,0.4)] active:scale-95 transition-all p-5"
           >
             {isPlaying ? <Pause size={32} fill="white" /> : <Play size={32} fill="white" className="ml-1" />}
           </button>
           <button
             onClick={handleStepForward}
+            aria-label="Next move"
             className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all font-bold"
           >
             <SkipForward size={24} fill="white" />
@@ -379,7 +400,7 @@ const Solution = () => {
           },
           {
             title: "Step-by-Step",
-            description: "Below the cube, you'll see a list of moves. 'R' means Right face clockwise, 'R\'' means counter-clockwise. Don't worry, we explain each one!",
+            description: `Below the cube, you'll see a list of moves. 'R' means Right face clockwise, "R'" means counter-clockwise. Don't worry, we explain each one!`,
             icon: <Clock className="w-10 h-10 text-white" />
           }
         ]}

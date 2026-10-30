@@ -1,26 +1,28 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:reusable_in_app_review/reusable_in_app_review.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
-import 'dart:convert';
-import 'dart:io';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   // Transparent status bar
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
   ));
-  
+
   runApp(const RubiksCubeSolverApp());
 }
 
@@ -50,12 +52,17 @@ class WebViewContainer extends StatefulWidget {
 
 class _WebViewContainerState extends State<WebViewContainer> {
   late final WebViewController _controller;
+  final InAppReviewService _inAppReviewService = InAppReviewService(
+    onError: (error, stackTrace) {
+      debugPrint('In-app review failed: $error');
+    },
+  );
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    
+
     final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
       params = WebKitWebViewControllerCreationParams(
@@ -69,8 +76,20 @@ class _WebViewContainerState extends State<WebViewContainer> {
     _controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFF0F172A))
+      ..addJavaScriptChannel(
+        'FlutterBridge',
+        onMessageReceived: _handleFlutterBridgeMessage,
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
+          onNavigationRequest: (NavigationRequest request) {
+            if (_shouldOpenExternally(request.url)) {
+              _openExternalUrl(request.url);
+              return NavigationDecision.prevent;
+            }
+
+            return NavigationDecision.navigate;
+          },
           onWebResourceError: (WebResourceError error) {
             debugPrint('WebView Error: ${error.description}');
           },
@@ -98,20 +117,75 @@ class _WebViewContainerState extends State<WebViewContainer> {
           .setAllowsBackForwardNavigationGestures(true);
     }
 
-
     _loadStaticFiles();
+  }
+
+  bool _shouldOpenExternally(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return false;
+
+    if (uri.scheme == 'intent' || uri.scheme == 'market') {
+      return true;
+    }
+
+    if ((uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host == 'play.google.com') {
+      return true;
+    }
+
+    return uri.scheme.isNotEmpty &&
+        !['http', 'https', 'file', 'about', 'data'].contains(uri.scheme);
+  }
+
+  Future<void> _openExternalUrl(String url) async {
+    final uri = _externalLaunchUri(url);
+    if (uri == null) {
+      debugPrint('Cannot parse external URL: $url');
+      return;
+    }
+
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched) {
+      debugPrint('Could not launch external URL: $uri');
+    }
+  }
+
+  Uri? _externalLaunchUri(String url) {
+    if (url.startsWith('intent://')) {
+      final webUrl = url.substring('intent://'.length).split('#Intent').first;
+      return Uri.tryParse('https://$webUrl');
+    }
+
+    return Uri.tryParse(url);
+  }
+
+  Future<void> _handleFlutterBridgeMessage(JavaScriptMessage message) async {
+    try {
+      final Object? decodedMessage = jsonDecode(message.message);
+      if (decodedMessage is! Map<String, dynamic>) {
+        debugPrint('Ignoring invalid FlutterBridge message.');
+        return;
+      }
+
+      if (decodedMessage['type'] == 'cube_solved') {
+        final result = await _inAppReviewService.requestAfterSuccessfulAction();
+        debugPrint('In-app review request result: ${result.name}');
+      }
+    } on FormatException catch (error) {
+      debugPrint('Ignoring malformed FlutterBridge message: $error');
+    }
   }
 
   Future<void> _loadStaticFiles() async {
     try {
       // Load the index.html from bundled assets
-      final String htmlContent = await rootBundle.loadString('assets/www/index.html');
-      
+      await rootBundle.loadString('assets/www/index.html');
+
       // We load via local server simulation (file schema)
       // This is necessary because CRA uses absolute paths for static assets (/static/js/...)
       // which won't resolve correctly if we just load the HTML string.
       // However, for Flutter WebView, we can point the base URL to assets/www/
-      
+
       _controller.loadFlutterAsset('assets/www/index.html');
     } catch (e) {
       debugPrint('Error loading webview assets: $e');
@@ -124,7 +198,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
       // We use a WillPopScope (or PopScope in newer versions) to handle back gestures in React
       body: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, result) async {
           if (didPop) return;
           if (await _controller.canGoBack()) {
             _controller.goBack();

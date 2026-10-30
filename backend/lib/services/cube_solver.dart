@@ -57,16 +57,20 @@ class CubeSolver {
           'error': 'Python solver not found. Ensure backend/solver.py exists.'
         };
       }
-      stdout.writeln('[CubeSolver] Using python solver at: ' + pythonScript);
+      stdout.writeln('[CubeSolver] Using python solver at: $pythonScript');
       
       // Prepare the command
       final colorsJson = jsonEncode(colors);
-      final result = Process.runSync('python3', [pythonScript, colorsJson]);
+      final result = Process.runSync(
+        'python3',
+        [pythonScript, colorsJson],
+        workingDirectory: p.dirname(pythonScript),
+      );
       if (result.stdout != null && result.stdout.toString().isNotEmpty) {
-        stdout.writeln('[CubeSolver] Python stdout: ' + result.stdout.toString());
+        stdout.writeln('[CubeSolver] Python stdout: ${result.stdout}');
       }
       if (result.stderr != null && result.stderr.toString().isNotEmpty) {
-        stderr.writeln('[CubeSolver] Python stderr: ' + result.stderr.toString());
+        stderr.writeln('[CubeSolver] Python stderr: ${result.stderr}');
       }
       
       if (result.exitCode == 0) {
@@ -87,20 +91,31 @@ class CubeSolver {
 
   String? _resolvePythonScriptPath() {
     // Try multiple likely locations
-    final currentDir = Directory.current.path; // typically .../backend when running `dart run`
     final scriptDir = File(Platform.script.toFilePath()).parent.path; // .../backend/lib/services
+    String? currentDir;
+
+    try {
+      currentDir = Directory.current.path; // typically .../backend when running `dart run`
+    } catch (e) {
+      stderr.writeln('[CubeSolver] Unable to read CWD: $e');
+    }
 
     final candidates = <String>[
-      p.join(currentDir, 'solver.py'),                  // backend/solver.py when cwd=backend
-      p.join(currentDir, 'backend', 'solver.py'),       // projectRoot/backend/solver.py when cwd=project root
       p.normalize(p.join(scriptDir, '../../solver.py')), // from services -> lib -> backend/solver.py
+      p.normalize(p.join(scriptDir, '../solver.py')),
+      p.normalize(p.join(scriptDir, 'solver.py')),
     ];
 
-    stdout.writeln('[CubeSolver] CWD: ' + currentDir);
-    stdout.writeln('[CubeSolver] ScriptDir: ' + scriptDir);
+    if (currentDir != null) {
+      candidates.insert(0, p.join(currentDir, 'backend', 'solver.py')); // projectRoot/backend/solver.py when cwd=project root
+      candidates.insert(0, p.join(currentDir, 'solver.py')); // backend/solver.py when cwd=backend
+    }
+
+    stdout.writeln('[CubeSolver] CWD: ${currentDir ?? 'unavailable'}');
+    stdout.writeln('[CubeSolver] ScriptDir: $scriptDir');
     for (final path in candidates) {
       final exists = File(path).existsSync();
-      stdout.writeln('[CubeSolver] Probe: ' + path + ' exists=' + exists.toString());
+      stdout.writeln('[CubeSolver] Probe: $path exists=$exists');
       if (exists) return path;
     }
     return null;

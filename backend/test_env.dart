@@ -1,4 +1,6 @@
+import 'dart:io';
+
 void main() {
-  print('Dart environment test successful');
+  stdout.writeln('Dart environment test successful');
 }
 

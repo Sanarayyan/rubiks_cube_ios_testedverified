@@ -40,9 +40,9 @@ class CubeGridWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: [
@@ -127,13 +127,13 @@ class CubeGridWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
           boxShadow: [
             BoxShadow(
-              color: _getColorValue(currentColor).withOpacity(0.3),
+              color: _getColorValue(currentColor).withValues(alpha: 0.3),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
           ],
           border: Border.all(
-            color: isCenter ? Colors.white.withOpacity(0.5) : Colors.black.withOpacity(0.1),
+            color: isCenter ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.1),
             width: isCenter ? 2 : 1,
           ),
         ),

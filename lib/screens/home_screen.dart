@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           letterSpacing: -1,
                           shadows: [
                             Shadow(
-                              color: Colors.black.withOpacity(0.3),
+                              color: Colors.black.withValues(alpha: 0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               fontWeight: FontWeight.w900,
                               shadows: [
                                 Shadow(
-                                  color: AppColors.primary.withOpacity(0.5),
+                                  color: AppColors.primary.withValues(alpha: 0.5),
                                   blurRadius: 20,
                                 ),
                               ],
@@ -97,9 +97,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.15),
+                              color: AppColors.primary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                             ),
                             child: const Text(
                               'PRO',
@@ -201,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Material(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               child: InkWell(
                 onTap: onTap,
                 child: Container(
@@ -209,12 +209,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withOpacity(0.05),
+                        color: color.withValues(alpha: 0.05),
                         blurRadius: 20,
                         spreadRadius: 0,
                       ),
@@ -227,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
+                          color: color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(icon, color: color, size: 28),
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -351,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Material(
               color: Colors.transparent,

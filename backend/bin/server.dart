@@ -4,6 +4,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
+import 'package:path/path.dart' as p;
 
 void main(List<String> arguments) async {
   final router = Router();
@@ -22,43 +23,12 @@ void main(List<String> arguments) async {
   final port = int.parse(Platform.environment['PORT'] ?? '8081');
   await io.serve(handler, InternetAddress.anyIPv4, port);
 
-  print('🚀 Rubik\'s Cube Backend Server running on http://localhost:$port');
-  print('📊 Health check: http://localhost:$port/api/health');
+  stdout.writeln('🚀 Rubik\'s Cube Backend Server running on http://localhost:$port');
+  stdout.writeln('📊 Health check: http://localhost:$port/api/health');
 }
 
 // Global history file path
 const String historyFilePath = 'history.json';
-
-Future<void> _saveToHistory(List<String> cubeState, Map<String, dynamic> solution, String mode) async {
-  try {
-    final file = File(historyFilePath);
-    List<dynamic> history = [];
-    if (await file.exists()) {
-      final content = await file.readAsString();
-      if (content.isNotEmpty) {
-        history = jsonDecode(content);
-      }
-    }
-    
-    final newEntry = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'created_at': DateTime.now().toIso8601String(),
-      'cube_state': cubeState,
-      'solution_moves': (solution['moves'] as List).map((m) => m['notation']).toList(),
-      'total_moves': solution['totalMoves'] ?? solution['moves'].length,
-      'estimated_time': solution['estimatedTime'] ?? (solution['moves'].length * 2),
-      'difficulty': solution['difficulty'] ?? (solution['moves'].length <= 10 ? 'Beginner' : 'Intermediate'),
-      'mode': mode,
-    };
-    
-    history.insert(0, newEntry); // Add to beginning
-    if (history.length > 50) history = history.sublist(0, 50); // Keep last 50
-    
-    await file.writeAsString(jsonEncode(history));
-  } catch (e) {
-    print('Error saving history: $e');
-  }
-}
 
 Future<Response> _getHistoryHandler(Request request) async {
   try {
@@ -122,8 +92,16 @@ Future<Response> _solveCubeHandler(Request request) async {
 
     final result = await _callPythonSolver(colors);
     if (result['success'] != true) {
-      return Response.ok(
-          jsonEncode({'success': false, 'error': result['error'] ?? 'Failed to solve cube'}),
+      final error = (result['error'] ?? 'Failed to solve cube').toString();
+      final isSolverUnavailable = _isSolverUnavailable(error);
+      return Response(isSolverUnavailable ? 503 : 422,
+          body: jsonEncode({
+            'success': false,
+            'error': isSolverUnavailable
+                ? 'Solver service unavailable'
+                : 'Could not solve cube',
+            'details': error,
+          }),
           headers: {'content-type': 'application/json'});
     }
 
@@ -134,9 +112,6 @@ Future<Response> _solveCubeHandler(Request request) async {
       solution = enriched;
     }
 
-    // Save to history asynchronously (Feature frozen)
-    // _saveToHistory(colors, solution, mode);
-
     return Response.ok(
       jsonEncode({'success': true, 'solution': solution}),
       headers: {'content-type': 'application/json'},
@@ -146,6 +121,15 @@ Future<Response> _solveCubeHandler(Request request) async {
         body: jsonEncode({'error': 'Internal server error: $e'}),
         headers: {'content-type': 'application/json'});
   }
+}
+
+bool _isSolverUnavailable(String error) {
+  final normalized = error.toLowerCase();
+  return normalized.contains('failed to call python solver') ||
+      normalized.contains('python solver not found') ||
+      normalized.contains('pathaccessexception') ||
+      normalized.contains('permission denied') ||
+      normalized.contains('operation not permitted');
 }
 
 Map<String, dynamic> _enrichForBeginner(
@@ -245,8 +229,7 @@ Map<String, String> _beginnerHints(String move) {
 
 Future<Map<String, dynamic>> _callPythonSolver(List<String> colors) async {
   try {
-    final scriptDir = Directory.current.path;
-    final pythonScript = '$scriptDir/solver.py';
+    final pythonScript = _resolvePythonScriptPath();
     final solverFile = File(pythonScript);
     if (!await solverFile.exists()) {
       return {
@@ -255,8 +238,11 @@ Future<Map<String, dynamic>> _callPythonSolver(List<String> colors) async {
       };
     }
     final colorsJson = jsonEncode(colors);
-    final pythonPath = '$scriptDir/venv/bin/python3';
-    final result = await Process.run(pythonPath, [pythonScript, colorsJson]);
+    final result = await Process.run(
+      'python3',
+      [pythonScript, colorsJson],
+      workingDirectory: p.dirname(pythonScript),
+    );
     if (result.exitCode != 0) {
       return {
         'success': false,
@@ -271,6 +257,24 @@ Future<Map<String, dynamic>> _callPythonSolver(List<String> colors) async {
   } catch (e) {
     return {'success': false, 'error': 'Failed to call Python solver: $e'};
   }
+}
+
+String _resolvePythonScriptPath() {
+  final scriptPath = Platform.script.toFilePath();
+  final scriptDir = p.dirname(scriptPath);
+  final candidates = [
+    p.normalize(p.join(scriptDir, '..', 'solver.py')),
+    p.normalize(p.join(scriptDir, '..', '..', 'backend', 'solver.py')),
+    p.normalize(p.join(scriptDir, 'solver.py')),
+  ];
+
+  for (final candidate in candidates) {
+    if (File(candidate).existsSync()) {
+      return candidate;
+    }
+  }
+
+  return candidates.first;
 }
 
 Future<Response> _uploadImageHandler(Request request) async {
@@ -301,4 +305,4 @@ Future<Response> _uploadImageHandler(Request request) async {
         body: jsonEncode({'error': 'Failed to process image: $e'}),
         headers: {'content-type': 'application/json'});
   }
-} 
+}

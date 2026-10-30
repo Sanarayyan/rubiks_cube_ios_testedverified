@@ -29,8 +29,8 @@ class HistoryScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(40),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.secondary.withOpacity(0.05),
-                      border: Border.all(color: AppColors.secondary.withOpacity(0.1)),
+                      color: AppColors.secondary.withValues(alpha: 0.05),
+                      border: Border.all(color: AppColors.secondary.withValues(alpha: 0.1)),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(100),
@@ -39,7 +39,7 @@ class HistoryScreen extends StatelessWidget {
                         child: Icon(
                           Icons.history_toggle_off_rounded,
                           size: 100,
-                          color: AppColors.secondary.withOpacity(0.5),
+                          color: AppColors.secondary.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -59,7 +59,7 @@ class HistoryScreen extends StatelessWidget {
                   child: Text(
                     'Your solve history will appear here once you start solving cubes with our AI engine.',
                     style: TextStyle(
-                      color: AppColors.textSecondary.withOpacity(0.7),
+                      color: AppColors.textSecondary.withValues(alpha: 0.7),
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -74,7 +74,7 @@ class HistoryScreen extends StatelessWidget {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: AppColors.secondary.withOpacity(0.3)),
+                        side: BorderSide(color: AppColors.secondary.withValues(alpha: 0.3)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: const Text('GO BACK', style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold)),

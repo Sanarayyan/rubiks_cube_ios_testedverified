@@ -1,6 +1,3 @@
-// Router configuration to suppress React Router v7 warnings
-import { UNSAFE_enhanceManualRouteObjects } from '@remix-run/router';
-
 // Suppress React Router warnings by setting future flags
 if (typeof window !== 'undefined') {
   // This will suppress the warnings in development
@@ -15,4 +12,6 @@ if (typeof window !== 'undefined') {
   };
 }
 
-export default {}; 
+const routerConfig = {};
+
+export default routerConfig; 
